@@ -31,9 +31,9 @@ RUN git clone https://github.com/aria2/aria2.git && \
     cd aria2 && \
     mkdir patches && \
     cd patches && \
-    wget https://raw.githubusercontent.com/motrixapp/aria2-factory/master/patches/0001-options-unlock-connection-per-server-limit.patch && \
-    wget https://raw.githubusercontent.com/motrixapp/aria2-factory/master/patches/0002-download-retry-on-slow-speed-and-reset.patch && \
-    wget https://raw.githubusercontent.com/motrixapp/aria2-factory/master/patches/0003-option-add-option-to-retry-on-http-4xx.patch && \
+    wget https://raw.githubusercontent.com/motrixapp/aria2-factory/master/patches/common/0001-options-unlock-connection-per-server-limit.patch && \
+    wget https://raw.githubusercontent.com/motrixapp/aria2-factory/master/patches/common/0002-download-retry-on-slow-speed-and-reset.patch && \
+    wget https://raw.githubusercontent.com/motrixapp/aria2-factory/master/patches/common/0003-option-add-option-to-retry-on-http-4xx.patch && \
     cd .. && \
     git apply patches/*.patch && \
     autoreconf -i && \
