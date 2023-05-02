@@ -1,0 +1,144 @@
+diff --git a/configure.ac b/configure.ac
+index 10acaba0..ff0ce0c6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -733,7 +733,7 @@ fi
+ 
+ # Checks for library functions.
+ AM_GNU_GETTEXT([external])
+-AM_GNU_GETTEXT_VERSION([0.18])
++AM_GNU_GETTEXT_VERSION([0.20])
+ AC_FUNC_ERROR_AT_LINE
+ AC_PROG_GCC_TRADITIONAL
+ 
+diff --git a/makerelease-osx.mk b/makerelease-osx.mk
+index 28548a73..5926ed5b 100644
+--- a/makerelease-osx.mk
++++ b/makerelease-osx.mk
+@@ -101,13 +101,13 @@ export LDFLAGS
+ LTO_FLAGS = -flto -ffunction-sections -fdata-sections
+ 
+ # Dependency versions
+-zlib_version = 1.2.11
+-zlib_hash = c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1
++zlib_version = 1.2.13
++zlib_hash = b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30
+ zlib_url = http://zlib.net/zlib-$(zlib_version).tar.gz
+ 
+-expat_version = 2.2.8
+-expat_hash = bd507cba42716ca9afe46dd3687fb0d46c09347517beb9770f53a435d2c67ea0
+-expat_url = https://github.com/libexpat/libexpat/releases/download/R_2_2_8/expat-2.2.8.tar.gz
++expat_version = 2.5.0
++expat_hash = 6b902ab103843592be5e99504f846ec109c1abb692e85347587f237a4ffa1033
++expat_url = https://github.com/libexpat/libexpat/releases/download/R_2_5_0/expat-2.5.0.tar.gz
+ expat_cflags=$(CFLAGS) $(LTO_FLAGS)
+ expat_ldflags=$(CFLAGS) $(LTO_FLAGS)
+ 
+@@ -118,15 +118,15 @@ cares_confflags = "--enable-optimize=$(OPTFLAGS)"
+ cares_cflags=$(CFLAGS) $(LTO_FLAGS)
+ cares_ldflags=$(CFLAGS) $(LTO_FLAGS)
+ 
+-sqlite_version = autoconf-3300000
+-sqlite_hash = e0a8cf4c7a87455e55e10413d16f358ca121ccec687fe1301eac95e2d340fc58
+-sqlite_url = https://sqlite.org/2019/sqlite-$(sqlite_version).tar.gz
++sqlite_version = autoconf-3410200
++sqlite_hash = e98c100dd1da4e30fa460761dab7c0b91a50b785e167f8c57acc46514fae9499
++sqlite_url = https://www.sqlite.org/2023/sqlite-$(sqlite_version).tar.gz
+ sqlite_cflags=$(CFLAGS) $(LTO_FLAGS)
+ sqlite_ldflags=$(CFLAGS) $(LTO_FLAGS)
+ 
+-gmp_version = 6.1.2
+-gmp_hash = 5275bb04f4863a13516b2f39392ac5e272f5e1bb8057b18aec1c9b79d73d8fb2
+-gmp_url = https://ftp.gnu.org/gnu/gmp/gmp-$(gmp_version).tar.bz2
++gmp_version = 6.2.1
++gmp_hash = eae9326beb4158c386e39a356818031bd28f3124cf915f8c5b1dc4c7a36b4d7c
++gmp_url = https://gmplib.org/download/gmp/gmp-$(gmp_version).tar.bz2
+ gmp_confflags = --disable-cxx --enable-assembly --with-pic --enable-fat
+ gmp_cflags=$(CFLAGS)
+ gmp_cxxflags=$(CXXFLAGS)
+@@ -145,8 +145,8 @@ libgcrypt_confflags=--with-gpg-error-prefix=$(PWD)/arch --disable-O-flag-munging
+ libgcrypt_cflags=$(PLATFORMFLAGS)
+ libgcrypt_cxxflags=$(PLATFORMFLAGS)
+ 
+-libssh2_version = 1.9.0
+-libssh2_hash = d5fb8bd563305fd1074dda90bd053fb2d29fc4bce048d182f96eaa466dfadafd
++libssh2_version = 1.10.0
++libssh2_hash = 2d64e90f3ded394b91d3a2e774ca203a4179f69aebee03003e5a6fa621e41d51
+ libssh2_url = https://www.libssh2.org/download/libssh2-$(libssh2_version).tar.gz
+ libssh2_cflags=$(CFLAGS) $(LTO_FLAGS)
+ libssh2_cxxflags=$(CXXFLAGS) $(LTO_FLAGS)
+@@ -162,7 +162,7 @@ cppunit_cxxflags=$(CXXFLAGS) $(LTO_FLAGS)
+ 
+ 
+ # ARCHLIBS that can be template build
+-ARCHLIBS = expat cares sqlite gmp libgpgerror libgcrypt libssh2 cppunit
++ARCHLIBS = expat cares sqlite libgpgerror libgcrypt libssh2 cppunit
+ # NONARCHLIBS that cannot be template build
+ NONARCHLIBS = zlib
+ 
+@@ -183,7 +183,7 @@ ARIA2_CONFFLAGS = \
+         --enable-bittorrent \
+         --disable-nls \
+         --with-appletls \
+-        --with-libgmp \
++        --without-libgmp \
+         --with-sqlite3 \
+         --with-libz \
+         --with-libexpat \
+@@ -298,7 +298,7 @@ libgpgerror.stamp: libgpgerror.tar.gz libgpgerror.check
+ # Using (NON)ARCH_template kinda stinks, but real multi-target pattern rules
+ # only exist in feverish dreams.
+ define NONARCH_template
+-$(1).build: $(1).x86_64.build
++$(1).build: $(1).arm64.build
+ 
+ deps:: $(1).build
+ 
+@@ -340,7 +340,7 @@ $(1).%.build: $(1).stamp
+ 	$$(MAKE) -C $$(DEST) -s install
+ 	touch $$@
+ 
+-$(1).build: $(1).x86_64.build
++$(1).build: $(1).arm64.build
+ 
+ deps:: $(1).build
+ 
+@@ -349,7 +349,7 @@ endef
+ $(foreach lib,$(ARCHLIBS),$(eval $(call ARCH_template,$(lib))))
+ 
+ .PRECIOUS: aria2.%.build
+-aria2.%.build: zlib.%.build expat.%.build gmp.%.build cares.%.build sqlite.%.build libgpgerror.%.build libgcrypt.%.build libssh2.%.build cppunit.%.build
++aria2.%.build: zlib.%.build expat.%.build cares.%.build sqlite.%.build libgpgerror.%.build libgcrypt.%.build libssh2.%.build cppunit.%.build
+ 	$(eval DEST := $$(basename $$@))
+ 	$(eval ARCH := $$(subst .,,$$(suffix $$(DEST))))
+ 	mkdir -p $(DEST)
+@@ -371,16 +371,16 @@ aria2.%.build: zlib.%.build expat.%.build gmp.%.build cares.%.build sqlite.%.bui
+ 	$(MAKE) -C $(DEST) -sj$(CPUS) install-strip
+ 	touch $@
+ 
+-aria2.build: aria2.x86_64.build
++aria2.build: aria2.arm64.build
+ 	mkdir -p $(ARIA2_PREFIX)/bin
+-	cp -f aria2.x86_64/aria2c $(ARIA2_PREFIX)/bin/aria2c
++	cp -f aria2.arm64/aria2c $(ARIA2_PREFIX)/bin/aria2c
+ 	arch -64 $(ARIA2_PREFIX)/bin/aria2c -v
+ 	touch $@
+ 
+-$(ARIA2_CHANGELOG): aria2.x86_64.build
++$(ARIA2_CHANGELOG): aria2.arm64.build
+ 	git log --pretty=fuller --date=short $(PREV_TAG)..HEAD > $@
+ 
+-$(ARIA2_DOCS): aria2.x86_64.build
++$(ARIA2_DOCS): aria2.arm64.build
+ 	cp -av $(SRCDIR)/$(@F) $@
+ 
+ $(ARIA2_DIST).tar.bz2: aria2.build $(ARIA2_DOCS) $(ARIA2_CHANGELOG)
+@@ -440,7 +440,7 @@ clean: clean-dist
+ 	rm -rf *aria2*
+ 
+ cleaner: clean
+-	rm -rf *.build *.check *.stamp $(ARCHLIBS) $(NONARCHLIBS) arch *.x86_64
++	rm -rf *.build *.check *.stamp $(ARCHLIBS) $(NONARCHLIBS) arch *.arm64
+ 
+ really-clean: cleaner
+ 	rm -rf *.tar.*

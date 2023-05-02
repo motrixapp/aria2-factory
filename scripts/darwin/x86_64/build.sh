@@ -1,34 +1,28 @@
 #!/bin/sh -e
 
-export LDFLAGS="-L/usr/local/lib"
-export CPPFLAGS="-I/usr/local/include"
-export LIBSSH2_PATH=$(brew info libssh2 | grep -oE "^/usr/[^/]+(/[a-zA-Z0-9_.-]+)*/*" | head -1)
+# Git clone aria2 repo
+mkdir tmp && cd tmp
+git clone https://github.com/aria2/aria2.git
+cd aria2
+
+# Download patches and apply
+mkdir patches
+cd patches
+wget https://raw.githubusercontent.com/motrixapp/aria2-factory/master/patches/common/0001-options-unlock-connection-per-server-limit.patch
+wget https://raw.githubusercontent.com/motrixapp/aria2-factory/master/patches/common/0002-download-retry-on-slow-speed-and-reset.patch
+wget https://raw.githubusercontent.com/motrixapp/aria2-factory/master/patches/common/0003-option-add-option-to-retry-on-http-4xx.patch
+wget https://raw.githubusercontent.com/motrixapp/aria2-factory/master/patches/darwin/fix_darwin_x86_64_deps.patch
+cd ..
+git apply patches/*.patch
+
+# Create python venv and install sphinx
+python3 -m venv build-release
+. build-release/bin/activate
+pip3 install -U sphinx
 
 autoreconf -i
 
-autoconf configure.ac
+rm -f Makefile
+ln -s ./makerelease-osx.mk Makefile
 
-autoconf -i
-
-./configure --enable-static \
-        --disable-shared \
-        --enable-metalink \
-        --enable-bittorrent \
-        --disable-nls \
-        --with-appletls \
-        --with-libgmp \
-        --with-sqlite3 \
-        --with-libz \
-        --with-libssh2="$LIBSSH2_PATH" \
-        --with-libexpat \
-        --with-libcares \
-        --without-libuv \
-        --without-gnutls \
-        --without-openssl \
-        --without-libnettle \
-        --without-libxml2 \
-        ARIA2_STATIC=yes
-
-make -j$(sysctl -n hw.ncpu) check
-
-make -j$(sysctl -n hw.ncpu)
+NON_RELEASE=1 make -j$(sysctl -n hw.ncpu)
