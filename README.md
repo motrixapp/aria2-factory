@@ -11,25 +11,12 @@ Ex. [Parallels Desktop](https://www.parallels.com/) + [macOS Ventura](https://ww
 Then install the basic software, such as [Homebrew](https://brew.sh), [Xcode Command Line Tools](https://developer.apple.com/xcode/resources/) etc.
 
 ```bash
-# Install libraries
-brew reinstall cppunit gettext gmp openssl libssh2 c-ares sqlite3 autoconf automake pkg-config libtool --force
-
 # Git clone codes
 git clone https://github.com/motrixapp/aria2-factory.git
-git clone https://github.com/aria2/aria2.git
 
-cd aria2
-
-# Apply patches
-git apply ../aria2-factory/patches/*.patch
-
-# Based on the system architecture type, copy the build script.
-cp ../aria2-factory/scripts/darwin/[arch]/build.sh ./
-
-# Install sphinx for generate docs
-python3 -m venv build-release
-. build-release/bin/activate
-pip3 install -U sphinx
+# Based on the system arch, copy the build script.
+ARCH=$(uname -m)
+cp ./scripts/darwin/$ARCH/build.sh ./
 
 # Go
 sh ./build.sh
