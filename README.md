@@ -18,6 +18,9 @@ git clone https://github.com/motrixapp/aria2-factory.git
 ARCH=$(uname -m)
 cp ./scripts/darwin/$ARCH/build.sh ./
 
+# Make build.sh executable
+chmod +x ./build.sh
+
 # Go
 sh ./build.sh
 ```
